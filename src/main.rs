@@ -50,46 +50,77 @@ impl Element {
                 if !bitmap.has(x, y + 1) {
                     bitmap.set(x, y + 1, Some(*self));
                     bitmap.clear(x, y);
+                    return;
+                }
+
+                // Bottom is blocked, go left or right
+                if rand::gen_range(0.0, 1.0) > 0.5 {
+                    // TODO: Refactor this to have to_left and to_right common methods
+                    // TODO: Refactor in-bounds checking
+                    // TODO: Refactor manual x > 0 check coz usize cannot be negative
+                    if x > 0
+                        && bitmap.is_in_bounds(x - 1, y + 1)
+                        && !bitmap.has(x - 1, y + 1)
+                        && !bitmap.has(x - 1, y)
+                    {
+                        bitmap.set(x - 1, y + 1, Some(*self));
+                        bitmap.clear(x, y);
+                    } else if bitmap.is_in_bounds(x + 1, y + 1)
+                        && !bitmap.has(x + 1, y + 1)
+                        && !bitmap.has(x + 1, y)
+                    {
+                        bitmap.set(x + 1, y + 1, Some(*self));
+                        bitmap.clear(x, y);
+                    }
                 } else {
-                    // Bottom is blocked, go left or right
-                    if rand::gen_range(0.0, 1.0) > 0.5 {
-                        // TODO: Refactor this to have to_left and to_right common methods
-                        // TODO: Refactor in-bounds checking
-                        // TODO: Refactor manual x > 0 check coz usize cannot be negative
-                        if x > 0
-                            && bitmap.is_in_bounds(x - 1, y + 1)
-                            && !bitmap.has(x - 1, y + 1)
-                            && !bitmap.has(x - 1, y)
-                        {
-                            bitmap.set(x - 1, y + 1, Some(*self));
-                            bitmap.clear(x, y);
-                        } else if bitmap.is_in_bounds(x + 1, y + 1)
-                            && !bitmap.has(x + 1, y + 1)
-                            && !bitmap.has(x + 1, y)
-                        {
-                            bitmap.set(x + 1, y + 1, Some(*self));
-                            bitmap.clear(x, y);
-                        }
-                    } else {
-                        if bitmap.is_in_bounds(x + 1, y + 1)
-                            && !bitmap.has(x + 1, y + 1)
-                            && !bitmap.has(x + 1, y)
-                        {
-                            bitmap.set(x + 1, y + 1, Some(*self));
-                            bitmap.clear(x, y);
-                        } else if x > 0
-                            && bitmap.is_in_bounds(x - 1, y + 1)
-                            && !bitmap.has(x - 1, y + 1)
-                            && !bitmap.has(x - 1, y)
-                        {
-                            bitmap.set(x - 1, y + 1, Some(*self));
-                            bitmap.clear(x, y);
-                        }
+                    if bitmap.is_in_bounds(x + 1, y + 1)
+                        && !bitmap.has(x + 1, y + 1)
+                        && !bitmap.has(x + 1, y)
+                    {
+                        bitmap.set(x + 1, y + 1, Some(*self));
+                        bitmap.clear(x, y);
+                    } else if x > 0
+                        && bitmap.is_in_bounds(x - 1, y + 1)
+                        && !bitmap.has(x - 1, y + 1)
+                        && !bitmap.has(x - 1, y)
+                    {
+                        bitmap.set(x - 1, y + 1, Some(*self));
+                        bitmap.clear(x, y);
                     }
                 }
             }
             ElementType::Water => {
-                // TODO:
+                if !bitmap.is_in_bounds(x, y + 1) {
+                    return;
+                }
+
+                if !bitmap.has(x, y + 1) {
+                    bitmap.set(x, y + 1, Some(*self));
+                    bitmap.clear(x, y);
+                    return;
+                }
+
+                // Bottom is blocked, go left or right
+                if rand::gen_range(0.0, 1.0) > 0.5 {
+                    // TODO: Refactor this to have to_left and to_right common methods
+                    // TODO: Refactor in-bounds checking
+                    // TODO: Refactor manual x > 0 check coz usize cannot be negative
+                    if x > 0 && bitmap.is_in_bounds(x - 1, y) && !bitmap.has(x - 1, y) {
+                        bitmap.set(x - 1, y, Some(*self));
+                        bitmap.clear(x, y);
+                    } else if bitmap.is_in_bounds(x + 1, y) && !bitmap.has(x + 1, y) {
+                        bitmap.set(x + 1, y, Some(*self));
+                        bitmap.clear(x, y);
+                    }
+                } else {
+                    if bitmap.is_in_bounds(x + 1, y) && !bitmap.has(x + 1, y) {
+                        bitmap.set(x + 1, y, Some(*self));
+                        bitmap.clear(x, y);
+                    } else if x > 0 && bitmap.is_in_bounds(x - 1, y) && !bitmap.has(x - 1, y) {
+                        bitmap.set(x - 1, y, Some(*self));
+                        bitmap.clear(x, y);
+                    }
+                }
             }
         }
     }
