@@ -1,5 +1,5 @@
 Todo:
-- [ ] Movement direction helpers
+- [x] Movement direction helpers
 - [ ] Fix that diagonal movement allowed for imperfect pixel walls
 - [ ] Add UI hints for elements selection
 - [ ] Air element type instead of Option::None?
