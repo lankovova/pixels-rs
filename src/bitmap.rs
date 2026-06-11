@@ -14,23 +14,29 @@ impl Bitmap {
         }
     }
 
+    fn idx(&self, x: usize, y: usize) -> usize {
+        y * CELLS_X_AMOUNT + x
+    }
+
     pub fn get(&self, x: usize, y: usize) -> Option<Element> {
-        self.grid[y * CELLS_X_AMOUNT + x]
+        self.grid[self.idx(x, y)]
     }
 
     pub fn set(&mut self, x: usize, y: usize, elem: Option<Element>) {
-        self.grid[y * CELLS_X_AMOUNT + x] = elem;
+        self.grid[self.idx(x, y)] = elem;
     }
 
     pub fn clear(&mut self, x: usize, y: usize) {
-        self.grid[y * CELLS_X_AMOUNT + x] = None;
+        self.grid[self.idx(x, y)] = None;
     }
 
-    pub fn has(&self, x: usize, y: usize) -> bool {
-        self.grid[y * CELLS_X_AMOUNT + x].is_some()
+    pub fn empty(&self, x: usize, y: usize) -> bool {
+        self.grid[self.idx(x, y)].is_none()
     }
 
-    pub fn is_in_bounds(&self, x: usize, y: usize) -> bool {
-        x < CELLS_X_AMOUNT && y < CELLS_Y_AMOUNT
+    pub fn swap_cells(&mut self, x: usize, y: usize, nx: usize, ny: usize) {
+        let src = self.idx(x, y);
+        let dest = self.idx(nx, ny);
+        self.grid.swap(src, dest);
     }
 }

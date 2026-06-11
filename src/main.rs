@@ -14,6 +14,7 @@ enum ElementType {
     Stone,
     Sand,
     Water,
+    // TODO: Add Air type instead of Option around Element
 }
 
 #[derive(Clone, Copy)]
@@ -21,6 +22,28 @@ struct Element {
     t: ElementType,
     color: Color,
     // TODO: velocity: u32,
+}
+
+fn try_move(bitmap: &mut Bitmap, x: usize, y: usize, dx: isize, dy: isize) -> bool {
+    let nx = x as isize + dx;
+    let ny = y as isize + dy;
+
+    if nx < 0 || ny < 0 || nx >= CELLS_X_AMOUNT as isize || ny >= CELLS_Y_AMOUNT as isize {
+        return false;
+    }
+
+    let nx = nx as usize;
+    let ny = ny as usize;
+
+    let target = bitmap.get(nx, ny);
+
+    // TODO: Make it so some moves could swap real elements (sand sinking into the water)
+    if target.is_none() {
+        bitmap.swap_cells(x, y, nx, ny);
+        return true;
+    }
+
+    return false;
 }
 
 impl Element {
@@ -43,82 +66,44 @@ impl Element {
                 return;
             }
             ElementType::Sand => {
-                if !bitmap.is_in_bounds(x, y + 1) {
+                if try_move(bitmap, x, y, 0, 1) {
                     return;
                 }
 
-                if !bitmap.has(x, y + 1) {
-                    bitmap.set(x, y + 1, Some(*self));
-                    bitmap.clear(x, y);
-                    return;
-                }
-
-                // Bottom is blocked, go left or right
-                if rand::gen_range(0.0, 1.0) > 0.5 {
-                    // TODO: Refactor this to have to_left and to_right common methods
-                    // TODO: Refactor in-bounds checking
-                    // TODO: Refactor manual x > 0 check coz usize cannot be negative
-                    if x > 0
-                        && bitmap.is_in_bounds(x - 1, y + 1)
-                        && !bitmap.has(x - 1, y + 1)
-                        && !bitmap.has(x - 1, y)
-                    {
-                        bitmap.set(x - 1, y + 1, Some(*self));
-                        bitmap.clear(x, y);
-                    } else if bitmap.is_in_bounds(x + 1, y + 1)
-                        && !bitmap.has(x + 1, y + 1)
-                        && !bitmap.has(x + 1, y)
-                    {
-                        bitmap.set(x + 1, y + 1, Some(*self));
-                        bitmap.clear(x, y);
+                if rand::gen_range(0.0, 1.0) < 0.5 {
+                    // TODO: For diagonal movement check if there is no blocking pixels on the sides
+                    if try_move(bitmap, x, y, -1, 1) || try_move(bitmap, x, y, 1, 1) {
+                        return;
                     }
                 } else {
-                    if bitmap.is_in_bounds(x + 1, y + 1)
-                        && !bitmap.has(x + 1, y + 1)
-                        && !bitmap.has(x + 1, y)
-                    {
-                        bitmap.set(x + 1, y + 1, Some(*self));
-                        bitmap.clear(x, y);
-                    } else if x > 0
-                        && bitmap.is_in_bounds(x - 1, y + 1)
-                        && !bitmap.has(x - 1, y + 1)
-                        && !bitmap.has(x - 1, y)
-                    {
-                        bitmap.set(x - 1, y + 1, Some(*self));
-                        bitmap.clear(x, y);
+                    if try_move(bitmap, x, y, 1, 1) || try_move(bitmap, x, y, -1, 1) {
+                        return;
                     }
                 }
             }
             ElementType::Water => {
-                if !bitmap.is_in_bounds(x, y + 1) {
+                if try_move(bitmap, x, y, 0, 1) {
                     return;
                 }
 
-                if !bitmap.has(x, y + 1) {
-                    bitmap.set(x, y + 1, Some(*self));
-                    bitmap.clear(x, y);
-                    return;
-                }
-
-                // Bottom is blocked, go left or right
-                if rand::gen_range(0.0, 1.0) > 0.5 {
-                    // TODO: Refactor this to have to_left and to_right common methods
-                    // TODO: Refactor in-bounds checking
-                    // TODO: Refactor manual x > 0 check coz usize cannot be negative
-                    if x > 0 && bitmap.is_in_bounds(x - 1, y) && !bitmap.has(x - 1, y) {
-                        bitmap.set(x - 1, y, Some(*self));
-                        bitmap.clear(x, y);
-                    } else if bitmap.is_in_bounds(x + 1, y) && !bitmap.has(x + 1, y) {
-                        bitmap.set(x + 1, y, Some(*self));
-                        bitmap.clear(x, y);
+                if rand::gen_range(0.0, 1.0) < 0.5 {
+                    // TODO: For diagonal movement check if there is no blocking pixels on the sides
+                    if try_move(bitmap, x, y, -1, 1) || try_move(bitmap, x, y, 1, 1) {
+                        return;
                     }
                 } else {
-                    if bitmap.is_in_bounds(x + 1, y) && !bitmap.has(x + 1, y) {
-                        bitmap.set(x + 1, y, Some(*self));
-                        bitmap.clear(x, y);
-                    } else if x > 0 && bitmap.is_in_bounds(x - 1, y) && !bitmap.has(x - 1, y) {
-                        bitmap.set(x - 1, y, Some(*self));
-                        bitmap.clear(x, y);
+                    if try_move(bitmap, x, y, 1, 1) || try_move(bitmap, x, y, -1, 1) {
+                        return;
+                    }
+                }
+
+                if rand::gen_range(0.0, 1.0) < 0.5 {
+                    if try_move(bitmap, x, y, -1, 0) || try_move(bitmap, x, y, 1, 0) {
+                        return;
+                    }
+                } else {
+                    if try_move(bitmap, x, y, 1, 0) || try_move(bitmap, x, y, -1, 0) {
+                        return;
                     }
                 }
             }
@@ -181,6 +166,7 @@ async fn main() {
     let mut bitmap = Bitmap::new();
     let mut active_element_type = ElementType::Stone;
     let mut is_eraser_on = false;
+    let mut frame: u32 = 0;
 
     // Skip first frame because screen dimensions are wrong on the first pass
     // probably because of auto resize that happens when user uses WM
@@ -213,18 +199,29 @@ async fn main() {
             if let Some(cell) = &hovered_cell {
                 if is_eraser_on {
                     bitmap.clear(cell.x, cell.y);
-                } else if !bitmap.has(cell.x, cell.y) {
+                } else if bitmap.empty(cell.x, cell.y) {
                     bitmap.set(cell.x, cell.y, Some(Element::new(active_element_type)));
                 }
             }
         }
 
         for y in (0..CELLS_Y_AMOUNT).rev() {
-            for x in 0..CELLS_X_AMOUNT {
-                let bit = bitmap.get(x, y);
+            // Alternating the scan order to prevent one direction bias (can be seen especially with fluids)
+            if frame % 2 == 0 {
+                for x in 0..CELLS_X_AMOUNT {
+                    let bit = bitmap.get(x, y);
 
-                if let Some(mut element) = bit {
-                    element.update(&mut bitmap, x, y);
+                    if let Some(mut element) = bit {
+                        element.update(&mut bitmap, x, y);
+                    }
+                }
+            } else {
+                for x in (0..CELLS_X_AMOUNT).rev() {
+                    let bit = bitmap.get(x, y);
+
+                    if let Some(mut element) = bit {
+                        element.update(&mut bitmap, x, y);
+                    }
                 }
             }
         }
@@ -238,6 +235,7 @@ async fn main() {
             is_eraser_on,
         );
 
+        frame += 1;
         next_frame().await
     }
 }
