@@ -152,14 +152,14 @@ async fn main() {
             if let Some(cell) = &hovered_cell {
                 if is_eraser_on {
                     bitmap.clear(cell.x, cell.y);
-                } else if bitmap.empty(cell.x, cell.y) {
+                } else if bitmap.is_empty(cell.x as isize, cell.y as isize) {
                     bitmap.set(cell.x, cell.y, Some(Element::new(active_element_type)));
                 }
             }
         }
 
         for y in (0..CELLS_Y_AMOUNT).rev() {
-            // Alternating the scan order to prevent one direction bias (can be seen especially with fluids)
+            // Alternating the scan order to prevent one direction bias (can be seen especially in fluids)
             if frame % 2 == 0 {
                 for x in 0..CELLS_X_AMOUNT {
                     let bit = bitmap.get(x, y);

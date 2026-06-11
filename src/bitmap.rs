@@ -30,8 +30,21 @@ impl Bitmap {
         self.grid[self.idx(x, y)] = None;
     }
 
-    pub fn empty(&self, x: usize, y: usize) -> bool {
-        self.grid[self.idx(x, y)].is_none()
+    pub fn is_in_bounds(&self, x: isize, y: isize) -> bool {
+        if x < 0 || y < 0 || x >= CELLS_X_AMOUNT as isize || y >= CELLS_Y_AMOUNT as isize {
+            return false;
+        }
+
+        return true;
+    }
+
+    // TODO: Change to can_move_into
+    pub fn is_empty(&self, x: isize, y: isize) -> bool {
+        if !self.is_in_bounds(x, y) {
+            return false;
+        }
+
+        self.grid[self.idx(x as usize, y as usize)].is_none()
     }
 
     pub fn swap_cells(&mut self, x: usize, y: usize, nx: usize, ny: usize) {

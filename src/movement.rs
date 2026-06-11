@@ -1,15 +1,11 @@
+use crate::bitmap::Bitmap;
 use macroquad::rand;
-
-use crate::{
-    bitmap::Bitmap,
-    constants::{CELLS_X_AMOUNT, CELLS_Y_AMOUNT},
-};
 
 fn try_move(bitmap: &mut Bitmap, x: usize, y: usize, dx: isize, dy: isize) -> bool {
     let nx = x as isize + dx;
     let ny = y as isize + dy;
 
-    if nx < 0 || ny < 0 || nx >= CELLS_X_AMOUNT as isize || ny >= CELLS_Y_AMOUNT as isize {
+    if !bitmap.is_in_bounds(nx, ny) {
         return false;
     }
 
@@ -33,12 +29,17 @@ pub fn try_fall(bitmap: &mut Bitmap, x: usize, y: usize) -> bool {
 
 pub fn try_diagonal_fall(bitmap: &mut Bitmap, x: usize, y: usize) -> bool {
     if rand::gen_range(0.0, 1.0) < 0.5 {
-        // TODO: For diagonal movement check if there is no blocking pixels on the sides
-        if try_move(bitmap, x, y, -1, 1) || try_move(bitmap, x, y, 1, 1) {
+        if bitmap.is_empty(x as isize - 1, y as isize) && try_move(bitmap, x, y, -1, 1) {
+            return true;
+        }
+        if bitmap.is_empty(x as isize + 1, y as isize) && try_move(bitmap, x, y, 1, 1) {
             return true;
         }
     } else {
-        if try_move(bitmap, x, y, 1, 1) || try_move(bitmap, x, y, -1, 1) {
+        if bitmap.is_empty(x as isize + 1, y as isize) && try_move(bitmap, x, y, 1, 1) {
+            return true;
+        }
+        if bitmap.is_empty(x as isize - 1, y as isize) && try_move(bitmap, x, y, -1, 1) {
             return true;
         }
     }
