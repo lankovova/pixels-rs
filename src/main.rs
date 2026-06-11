@@ -14,14 +14,12 @@ enum ElementType {
     Stone,
     Sand,
     Water,
-    // TODO: Add Air type instead of Option around Element
 }
 
 #[derive(Clone, Copy)]
 struct Element {
     t: ElementType,
     color: Color,
-    // TODO: velocity: u32,
 }
 
 fn try_move(bitmap: &mut Bitmap, x: usize, y: usize, dx: isize, dy: isize) -> bool {
