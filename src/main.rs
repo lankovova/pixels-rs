@@ -36,32 +36,6 @@ impl Element {
 
         Self { t, color }
     }
-
-    fn update(&mut self, bitmap: &mut Bitmap, x: usize, y: usize) {
-        match self.t {
-            ElementType::Stone => {
-                return;
-            }
-            ElementType::Sand => {
-                if movement::try_fall(bitmap, x, y) {
-                    return;
-                }
-
-                movement::try_diagonal_fall(bitmap, x, y);
-            }
-            ElementType::Water => {
-                if movement::try_fall(bitmap, x, y) {
-                    return;
-                }
-
-                if movement::try_diagonal_fall(bitmap, x, y) {
-                    return;
-                }
-
-                movement::try_sideways(bitmap, x, y);
-            }
-        }
-    }
 }
 
 fn render(
@@ -112,9 +86,9 @@ fn render(
     draw_text(hovered_text, 10.0, 20.0, 16.0, WHITE);
 
     let active_text = if is_eraser_on {
-        "Eraser".to_string()
+        "Selected: Eraser".to_string()
     } else {
-        format!("Active element: {:?}", active_element_type)
+        format!("Selected: {:?}", active_element_type)
     };
     draw_text(active_text, 10.0, 40.0, 16.0, WHITE);
 
@@ -172,26 +146,7 @@ async fn main() {
             }
         }
 
-        for y in (0..CELLS_Y_AMOUNT).rev() {
-            // Alternating the scan order to prevent one direction bias (can be seen especially in fluids)
-            if frame % 2 == 0 {
-                for x in 0..CELLS_X_AMOUNT {
-                    let bit = bitmap.get(x, y);
-
-                    if let Some(mut element) = bit {
-                        element.update(&mut bitmap, x, y);
-                    }
-                }
-            } else {
-                for x in (0..CELLS_X_AMOUNT).rev() {
-                    let bit = bitmap.get(x, y);
-
-                    if let Some(mut element) = bit {
-                        element.update(&mut bitmap, x, y);
-                    }
-                }
-            }
-        }
+        bitmap.update(frame);
 
         render(
             &bitmap,
