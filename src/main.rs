@@ -104,14 +104,28 @@ fn render(
     }
 
     // UI
-    draw_text(format!("cell: {:?}", hovered_cell), 10.0, 20.0, 16.0, WHITE);
+    let hovered_text = if let Some(cell) = hovered_cell {
+        format!("Hovered: x: {}, y: {}", cell.x, cell.y)
+    } else {
+        "Hovered: None".to_string()
+    };
+    draw_text(hovered_text, 10.0, 20.0, 16.0, WHITE);
+
     let active_text = if is_eraser_on {
         "Eraser".to_string()
     } else {
-        format!("active element: {:?}", active_element_type)
+        format!("Active element: {:?}", active_element_type)
     };
-
     draw_text(active_text, 10.0, 40.0, 16.0, WHITE);
+
+    draw_multiline_text(
+        "Elements:\ns[t]one\n[s]and\n[w]ater",
+        screen_width() - 120.0,
+        20.0,
+        16.0,
+        Some(1.0),
+        WHITE,
+    );
 }
 
 #[macroquad::main("Pixust")]
@@ -135,7 +149,7 @@ async fn main() {
             bitmap = Bitmap::new();
         }
 
-        if is_key_pressed(KeyCode::E) {
+        if is_key_pressed(KeyCode::E) && !is_key_down(KeyCode::LeftControl) {
             is_eraser_on = true;
         } else if is_key_pressed(KeyCode::W) {
             active_element_type = ElementType::Water;
