@@ -10,6 +10,7 @@ Todo:
 
 Back burner:
 - [ ] Display what element is under cursor
+- [ ] Rethink eraser (chaning element to Air under the hood feels weird)
 
 Late game:
 - [ ] Velocity
