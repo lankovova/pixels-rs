@@ -13,7 +13,7 @@ Todo:
 Back burner:
 - [ ] Display what element is under cursor
 - [ ] Rethink eraser (chaning element to Air under the hood feels weird)
-- [ ] Fix water climbing upwards sand stream
+- [ ] Fix water climbing upwards sand stream (full intent system)
 
 Late game:
 - [ ] Velocity
