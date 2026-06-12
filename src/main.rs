@@ -111,7 +111,6 @@ async fn main() {
     let mut bitmap = Bitmap::new();
     let mut active_element_type = ElementType::Stone;
     let mut is_eraser_on = false;
-    let mut frame: u32 = 0;
 
     // Skip first frame because screen dimensions are wrong on the first pass
     // probably because of auto resize that happens when user uses WM
@@ -120,7 +119,6 @@ async fn main() {
     loop {
         let cell_width = screen_width() / (CELLS_X_AMOUNT as f32);
         let cell_height = screen_height() / (CELLS_Y_AMOUNT as f32);
-
         let hovered_cell = get_hovered_cell(cell_width, cell_height);
 
         if is_key_down(KeyCode::LeftControl) && is_key_released(KeyCode::E) {
@@ -150,7 +148,7 @@ async fn main() {
             }
         }
 
-        bitmap.update(frame);
+        bitmap.update();
 
         render(
             &bitmap,
@@ -161,7 +159,6 @@ async fn main() {
             is_eraser_on,
         );
 
-        frame += 1;
         next_frame().await
     }
 }

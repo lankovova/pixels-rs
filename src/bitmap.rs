@@ -4,14 +4,17 @@ use crate::{
     movement,
 };
 
+// TODO: Rename to world
 pub struct Bitmap {
     cells: [Element; CELLS_X_AMOUNT * CELLS_Y_AMOUNT],
+    frame: u32,
 }
 
 impl Bitmap {
     pub fn new() -> Self {
         Self {
             cells: core::array::from_fn(|_| Element::new(ElementType::Air)),
+            frame: 0,
         }
     }
 
@@ -54,20 +57,21 @@ impl Bitmap {
         }
 
         let source_elem_type = self.cells[self.idx(x as usize, y as usize)].t;
-        allowed.iter().any(|elem| elem == &source_elem_type)
+        allowed.contains(&source_elem_type)
     }
 
     pub fn swap_cells(&mut self, x: usize, y: usize, nx: usize, ny: usize) {
         let src = self.idx(x, y);
         let dest = self.idx(nx, ny);
+
         self.cells.swap(src, dest);
 
-        // Kinda hacky, calling this to run update on the cell that was swapped in place of src
+        // Hacky, calling this to run update on the cell that was swapped in place of src
         // coz otherwise update will never fire on that cell in that frame.
         // And in situations like pouring sand into water that makes water go as high as the
         // point of where sand starts pouring
         // FIXME: Probably would go into infinite loop when two cells could swap each other
-        self.update_cell(x, y);
+        // self.update_cell(x, y);
     }
 
     fn update_cell(&mut self, x: usize, y: usize) {
@@ -98,10 +102,10 @@ impl Bitmap {
         }
     }
 
-    pub fn update(&mut self, frame: u32) {
+    pub fn update(&mut self) {
         for y in (0..CELLS_Y_AMOUNT).rev() {
             // Alternating the scan order to prevent one direction bias (can be seen especially in fluids)
-            if frame % 2 == 0 {
+            if self.frame % 2 == 0 {
                 for x in 0..CELLS_X_AMOUNT {
                     self.update_cell(x, y);
                 }
@@ -111,5 +115,7 @@ impl Bitmap {
                 }
             }
         }
+
+        self.frame += 1;
     }
 }

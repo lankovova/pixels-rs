@@ -7,6 +7,7 @@ Todo:
 - [x] Sand should sunk into water
 - [ ] Add another liquid (density param?)
 - [ ] Add gases
+- [ ] Fix water climbing upwards sand stream
 
 Back burner:
 - [ ] Display what element is under cursor
@@ -15,4 +16,5 @@ Back burner:
 Late game:
 - [ ] Velocity
 - [ ] Burning
+- [ ] Pressure
 - [ ] Spawn elements in different patterns
