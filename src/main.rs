@@ -29,15 +29,15 @@ impl Element {
         let color = match t {
             ElementType::Air => BLACK,
             ElementType::Stone => {
-                let amount = rand::gen_range(-0.2, 0.2);
+                let amount = rand::gen_range(-0.1, 0.1);
                 utils::lighten_hsl(GRAY, amount)
             }
             ElementType::Sand => {
-                let amount = rand::gen_range(-0.2, 0.2);
+                let amount = rand::gen_range(-0.2, 0.1);
                 utils::lighten_hsl(GOLD, amount)
             }
             ElementType::Water => {
-                let amount = rand::gen_range(-0.2, 0.2);
+                let amount = rand::gen_range(-0.1, 0.1);
                 utils::lighten_hsl(BLUE, amount)
             }
         };
@@ -111,6 +111,7 @@ async fn main() {
     let mut bitmap = Bitmap::new();
     let mut active_element_type = ElementType::Stone;
     let mut is_eraser_on = false;
+    let mut frame = 0;
 
     // Skip first frame because screen dimensions are wrong on the first pass
     // probably because of auto resize that happens when user uses WM
@@ -143,12 +144,16 @@ async fn main() {
                 if is_eraser_on {
                     bitmap.clear(cell.x, cell.y);
                 } else if bitmap.is_empty(cell.x as isize, cell.y as isize) {
-                    bitmap.set(cell.x, cell.y, Element::new(active_element_type));
+                    // Spawn elements every other frame
+                    // to hide water climbing continuous sand streams
+                    if frame % 2 == 0 {
+                        bitmap.set(cell.x, cell.y, Element::new(active_element_type));
+                    }
                 }
             }
         }
 
-        bitmap.update();
+        bitmap.update(frame);
 
         render(
             &bitmap,
@@ -159,6 +164,7 @@ async fn main() {
             is_eraser_on,
         );
 
+        frame += 1;
         next_frame().await
     }
 }

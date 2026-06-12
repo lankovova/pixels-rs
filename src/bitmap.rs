@@ -7,14 +7,12 @@ use crate::{
 // TODO: Rename to world
 pub struct Bitmap {
     cells: [Element; CELLS_X_AMOUNT * CELLS_Y_AMOUNT],
-    frame: u32,
 }
 
 impl Bitmap {
     pub fn new() -> Self {
         Self {
             cells: core::array::from_fn(|_| Element::new(ElementType::Air)),
-            frame: 0,
         }
     }
 
@@ -102,10 +100,10 @@ impl Bitmap {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, frame: u32) {
         for y in (0..CELLS_Y_AMOUNT).rev() {
             // Alternating the scan order to prevent one direction bias (can be seen especially in fluids)
-            if self.frame % 2 == 0 {
+            if frame % 2 == 0 {
                 for x in 0..CELLS_X_AMOUNT {
                     self.update_cell(x, y);
                 }
@@ -115,7 +113,5 @@ impl Bitmap {
                 }
             }
         }
-
-        self.frame += 1;
     }
 }
