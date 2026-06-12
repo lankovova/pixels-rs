@@ -1,4 +1,4 @@
-use crate::bitmap::Bitmap;
+use crate::{ElementType, bitmap::Bitmap};
 use macroquad::rand;
 
 fn try_move(bitmap: &mut Bitmap, x: usize, y: usize, dx: isize, dy: isize) -> bool {
@@ -15,7 +15,7 @@ fn try_move(bitmap: &mut Bitmap, x: usize, y: usize, dx: isize, dy: isize) -> bo
     let target = bitmap.get(nx, ny);
 
     // TODO: Make it so some moves could swap real elements (sand sinking into the water)
-    if target.is_none() {
+    if target.t == ElementType::Air {
         bitmap.swap_cells(x, y, nx, ny);
         return true;
     }

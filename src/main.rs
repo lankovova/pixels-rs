@@ -10,8 +10,9 @@ use crate::{
 };
 use macroquad::prelude::*;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ElementType {
+    Air,
     Stone,
     Sand,
     Water,
@@ -26,13 +27,20 @@ struct Element {
 impl Element {
     fn new(t: ElementType) -> Self {
         let color = match t {
-            ElementType::Stone => GRAY,
-            ElementType::Sand => GOLD,
-            ElementType::Water => BLUE,
+            ElementType::Air => BLACK,
+            ElementType::Stone => {
+                let amount = rand::gen_range(-0.2, 0.2);
+                utils::lighten_hsl(GRAY, amount)
+            }
+            ElementType::Sand => {
+                let amount = rand::gen_range(-0.2, 0.2);
+                utils::lighten_hsl(GOLD, amount)
+            }
+            ElementType::Water => {
+                let amount = rand::gen_range(-0.2, 0.2);
+                utils::lighten_hsl(BLUE, amount)
+            }
         };
-
-        let amount = rand::gen_range(-0.2, 0.2);
-        let color = utils::lighten_hsl(color, amount);
 
         Self { t, color }
     }
@@ -50,11 +58,7 @@ fn render(
 
     for y in 0..CELLS_Y_AMOUNT {
         for x in 0..CELLS_X_AMOUNT {
-            let mb_element = &bitmap.get(x, y);
-
-            let Some(element) = mb_element else {
-                continue;
-            };
+            let element = &bitmap.get(x, y);
 
             draw_rectangle(
                 (x as f32) * cell_width,
@@ -141,7 +145,7 @@ async fn main() {
                 if is_eraser_on {
                     bitmap.clear(cell.x, cell.y);
                 } else if bitmap.is_empty(cell.x as isize, cell.y as isize) {
-                    bitmap.set(cell.x, cell.y, Some(Element::new(active_element_type)));
+                    bitmap.set(cell.x, cell.y, Element::new(active_element_type));
                 }
             }
         }

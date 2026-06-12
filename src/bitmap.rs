@@ -5,13 +5,13 @@ use crate::{
 };
 
 pub struct Bitmap {
-    cells: [Option<Element>; CELLS_X_AMOUNT * CELLS_Y_AMOUNT],
+    cells: [Element; CELLS_X_AMOUNT * CELLS_Y_AMOUNT],
 }
 
 impl Bitmap {
     pub fn new() -> Self {
         Self {
-            cells: core::array::from_fn(|_| None),
+            cells: core::array::from_fn(|_| Element::new(ElementType::Air)),
         }
     }
 
@@ -19,16 +19,16 @@ impl Bitmap {
         y * CELLS_X_AMOUNT + x
     }
 
-    pub fn get(&self, x: usize, y: usize) -> Option<Element> {
+    pub fn get(&self, x: usize, y: usize) -> Element {
         self.cells[self.idx(x, y)]
     }
 
-    pub fn set(&mut self, x: usize, y: usize, elem: Option<Element>) {
+    pub fn set(&mut self, x: usize, y: usize, elem: Element) {
         self.cells[self.idx(x, y)] = elem;
     }
 
     pub fn clear(&mut self, x: usize, y: usize) {
-        self.cells[self.idx(x, y)] = None;
+        self.cells[self.idx(x, y)] = Element::new(ElementType::Air);
     }
 
     pub fn is_in_bounds(&self, x: isize, y: isize) -> bool {
@@ -45,7 +45,7 @@ impl Bitmap {
             return false;
         }
 
-        self.cells[self.idx(x as usize, y as usize)].is_none()
+        self.cells[self.idx(x as usize, y as usize)].t == ElementType::Air
     }
 
     pub fn swap_cells(&mut self, x: usize, y: usize, nx: usize, ny: usize) {
@@ -55,14 +55,10 @@ impl Bitmap {
     }
 
     fn update_cell(&mut self, x: usize, y: usize) {
-        let mb_element = self.get(x, y);
-
-        let Some(element) = mb_element else {
-            return;
-        };
+        let element = self.get(x, y);
 
         match element.t {
-            ElementType::Stone => {
+            ElementType::Air | ElementType::Stone => {
                 return;
             }
             ElementType::Sand => {
