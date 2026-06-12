@@ -48,10 +48,26 @@ impl Bitmap {
         self.cells[self.idx(x as usize, y as usize)].t == ElementType::Air
     }
 
+    pub fn can_move_into(&self, x: isize, y: isize, allowed: &[ElementType]) -> bool {
+        if !self.is_in_bounds(x, y) {
+            return false;
+        }
+
+        let source_elem_type = self.cells[self.idx(x as usize, y as usize)].t;
+        allowed.iter().any(|elem| elem == &source_elem_type)
+    }
+
     pub fn swap_cells(&mut self, x: usize, y: usize, nx: usize, ny: usize) {
         let src = self.idx(x, y);
         let dest = self.idx(nx, ny);
         self.cells.swap(src, dest);
+
+        // Kinda hacky, calling this to run update on the cell that was swapped in place of src
+        // coz otherwise update will never fire on that cell in that frame.
+        // And in situations like pouring sand into water that makes water go as high as the
+        // point of where sand starts pouring
+        // FIXME: Probably would go into infinite loop when two cells could swap each other
+        self.update_cell(x, y);
     }
 
     fn update_cell(&mut self, x: usize, y: usize) {
@@ -62,22 +78,22 @@ impl Bitmap {
                 return;
             }
             ElementType::Sand => {
-                if movement::try_fall(self, x, y) {
+                if movement::try_fall(self, x, y, &[ElementType::Air, ElementType::Water]) {
                     return;
                 }
 
-                movement::try_diagonal_fall(self, x, y);
+                movement::try_diagonal_fall(self, x, y, &[ElementType::Air, ElementType::Water]);
             }
             ElementType::Water => {
-                if movement::try_fall(self, x, y) {
+                if movement::try_fall(self, x, y, &[ElementType::Air]) {
                     return;
                 }
 
-                if movement::try_diagonal_fall(self, x, y) {
+                if movement::try_diagonal_fall(self, x, y, &[ElementType::Air]) {
                     return;
                 }
 
-                movement::try_sideways(self, x, y);
+                movement::try_sideways(self, x, y, &[ElementType::Air]);
             }
         }
     }

@@ -4,8 +4,8 @@ Todo:
 - [x] Add UI hints for elements selection
 - [x] Re-organize stuff to make Element thinner
 - [x] Air element type instead of Option::None
-- [ ] Sand should sunk into water (general density param)
-- [ ] Add another liquid
+- [x] Sand should sunk into water
+- [ ] Add another liquid (density param?)
 - [ ] Add gases
 
 Back burner:
