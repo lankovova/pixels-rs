@@ -5,6 +5,8 @@ Todo:
 - [x] Re-organize stuff to make Element thinner
 - [x] Air element type instead of Option::None
 - [x] Sand should sunk into water
+- [ ] Interpolate drawing so there would be no gaps in fast cursor moving while spawning
+- [ ] Spawn elements in different patterns
 - [ ] Add another liquid (density param?)
 - [ ] Add gases
 
@@ -17,4 +19,3 @@ Late game:
 - [ ] Velocity
 - [ ] Burning
 - [ ] Pressure
-- [ ] Spawn elements in different patterns
