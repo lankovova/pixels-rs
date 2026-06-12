@@ -5,11 +5,11 @@ use crate::{
 };
 
 // TODO: Rename to world
-pub struct Bitmap {
+pub struct World {
     cells: [Element; CELLS_X_AMOUNT * CELLS_Y_AMOUNT],
 }
 
-impl Bitmap {
+impl World {
     pub fn new() -> Self {
         Self {
             cells: core::array::from_fn(|_| Element::new(ElementType::Air)),
@@ -63,13 +63,6 @@ impl Bitmap {
         let dest = self.idx(nx, ny);
 
         self.cells.swap(src, dest);
-
-        // Hacky, calling this to run update on the cell that was swapped in place of src
-        // coz otherwise update will never fire on that cell in that frame.
-        // And in situations like pouring sand into water that makes water go as high as the
-        // point of where sand starts pouring
-        // FIXME: Probably would go into infinite loop when two cells could swap each other
-        // self.update_cell(x, y);
     }
 
     fn update_cell(&mut self, x: usize, y: usize) {

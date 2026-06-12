@@ -1,12 +1,12 @@
-mod bitmap;
 mod constants;
 mod movement;
 mod utils;
+mod world;
 
 use crate::{
-    bitmap::Bitmap,
     constants::{CELLS_X_AMOUNT, CELLS_Y_AMOUNT},
     utils::{CellCoords, get_hovered_cell},
+    world::World,
 };
 use macroquad::prelude::*;
 
@@ -47,7 +47,7 @@ impl Element {
 }
 
 fn render(
-    bitmap: &Bitmap,
+    world: &World,
     cell_width: f32,
     cell_height: f32,
     hovered_cell: Option<CellCoords>,
@@ -58,7 +58,7 @@ fn render(
 
     for y in 0..CELLS_Y_AMOUNT {
         for x in 0..CELLS_X_AMOUNT {
-            let element = &bitmap.get(x, y);
+            let element = &world.get(x, y);
 
             draw_rectangle(
                 (x as f32) * cell_width,
@@ -108,7 +108,7 @@ fn render(
 
 #[macroquad::main("Pixust")]
 async fn main() {
-    let mut bitmap = Bitmap::new();
+    let mut world = World::new();
     let mut active_element_type = ElementType::Stone;
     let mut is_eraser_on = false;
     let mut frame = 0;
@@ -123,7 +123,7 @@ async fn main() {
         let hovered_cell = get_hovered_cell(cell_width, cell_height);
 
         if is_key_down(KeyCode::LeftControl) && is_key_released(KeyCode::E) {
-            bitmap = Bitmap::new();
+            world = World::new();
         }
 
         if is_key_pressed(KeyCode::E) && !is_key_down(KeyCode::LeftControl) {
@@ -142,21 +142,21 @@ async fn main() {
         if is_mouse_button_down(MouseButton::Left) {
             if let Some(cell) = &hovered_cell {
                 if is_eraser_on {
-                    bitmap.clear(cell.x, cell.y);
-                } else if bitmap.is_empty(cell.x as isize, cell.y as isize) {
+                    world.clear(cell.x, cell.y);
+                } else if world.is_empty(cell.x as isize, cell.y as isize) {
                     // Spawn elements every other frame
                     // to hide water climbing continuous sand streams
                     if frame % 2 == 0 {
-                        bitmap.set(cell.x, cell.y, Element::new(active_element_type));
+                        world.set(cell.x, cell.y, Element::new(active_element_type));
                     }
                 }
             }
         }
 
-        bitmap.update(frame);
+        world.update(frame);
 
         render(
-            &bitmap,
+            &world,
             cell_width,
             cell_height,
             hovered_cell,
